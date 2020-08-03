@@ -1,5 +1,5 @@
 #include <DHT.h>
-// This file MUST be in the same folder as the .ino file
+// This file MUST be in the same folder as the .ino file.
 #include "config.h"
 // Setting up the DHT Sensor
 
