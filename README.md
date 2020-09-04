@@ -6,8 +6,9 @@ This repository contains the [Prometeo](https://github.com/Code-and-Response/Pro
 
 ## Setting up the solution
 
-* Install Android Studio
-* Add Samsung SDKs for the device and the watch
+* For breadboard set up, see [PROTOTYPING.md](PROTOTYPING.md)
+* For PCB board, instructions will be in [PCB.md](PCB.md)
+* For the case design, see [CASE.md](CASE.md)
 
 ## Contributing
 
