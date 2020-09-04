@@ -4,7 +4,7 @@ Instructions to come.
 
 ## Initial case design
 
-[3D step file](Prometeo_20200902.stp)
+[3D step file](case/Prometeo_20200902.stp)
 
 ![ISO views](img/case-iso.png)
 
