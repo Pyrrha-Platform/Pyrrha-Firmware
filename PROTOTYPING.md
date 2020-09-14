@@ -52,7 +52,7 @@ This section will guide you in verifying the correct polarity of the LiPo batter
 How-to Videos: 
 * How to [quickly determine the polarity](https://www.youtube.com/watch?v=xoUHbf_bRxw) of your DC power supply with a multimeter
 * [Reverse polarity](https://www.youtube.com/watch?v=mvnf8phaPOY)
-* Video for [testing and swapping leads](https://ibm.ent.box.com/file/698433709848)
+* Video for [testing and swapping leads](https://youtu.be/BtlHtQD7auI)
 
 ## Part 4: ESP32 Featherboard Pinout Diagram
 
