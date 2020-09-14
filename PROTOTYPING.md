@@ -108,7 +108,7 @@ How-to Videos: 
 
    ![Reverse polarity](img/6-leds-active.jpeg)
     
-3. Download [sketch_RGBWstrandtest](/Code-and-Response/Prometeo-Firmware/tree/master/september-prototypes/sketch_RGBWstrandtest) sketch code. Open the code in Arduino IDE and click the **Upload** button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message.
+3. Download [sketch_RGBWstrandtest](https://github.com/Code-and-Response/Prometeo-Firmware/tree/master/september-prototypes/sketch_RGBWstrandtest) sketch code. Open the code in Arduino IDE and click the **Upload** button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message.
 
 4. The LED should cycle through Green, Red, Blue, Yellow colors, followed by Rainbow colors fade to white.    
 
@@ -141,7 +141,7 @@ There are built-in SD card tests in Arduino ID as well. **File** > **Examples** 
 
 ## Part 8: Bluetooth Test
 
-Download George's testing sketch Bluetooth Test code: https://ibm.box.com/s/eyw1x2td8vtrhaoaxug3sqlgmkf93eu7 Open it in the Arduino IDE and click the 'Upload' button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message. 
+Download George's testing sketch [Bluetooth Test code](https://github.com/Code-and-Response/Prometeo-Firmware/tree/master/september-prototypes/BLE-OK) Open it in the Arduino IDE and click the 'Upload' button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message. 
 
 1. Open Bluetooth Preferences on your computer and look for "ESP32"
 
