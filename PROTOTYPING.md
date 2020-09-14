@@ -52,7 +52,7 @@ This section will guide you in verifying the correct polarity of the LiPo batter
 How-to Videos: 
 * How to [quickly determine the polarity](https://www.youtube.com/watch?v=xoUHbf_bRxw) of your DC power supply with a multimeter
 * [Reverse polarity](https://www.youtube.com/watch?v=mvnf8phaPOY)
-* Video for [testing and swapping leads](https://ibm.ent.box.com/file/698433709848)
+* Video for [testing and swapping leads](https://youtu.be/BtlHtQD7auI)
 
 ## Part 4: ESP32 Featherboard Pinout Diagram
 
@@ -77,7 +77,7 @@ How-to Videos: 
 
     ![Reverse polarity](img/5-breadboard.jpeg)
 
-3. Download [sketch_DHT22_Sensor](sketch_DHT22_Sensor) sketch code. Open the code in Arduino IDE and click the **Upload** button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message. 
+3. Download [sketch_DHT22_Sensor](https://github.com/Code-and-Response/Prometeo-Firmware/tree/master/september-prototypes/sketch_DHT22_Sensor) sketch code. Open the code in Arduino IDE and click the **Upload** button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message. 
 
 4. In the Arduino IDE menu, open **Tools** -> **Serial Monitor**
 
@@ -108,7 +108,7 @@ How-to Videos: 
 
    ![Reverse polarity](img/6-leds-active.jpeg)
     
-3. Download [sketch_RGBWstrandtest](sketch_RGBWstrandtest) sketch code. Open the code in Arduino IDE and click the **Upload** button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message.
+3. Download [sketch_RGBWstrandtest](https://github.com/Code-and-Response/Prometeo-Firmware/tree/master/september-prototypes/sketch_RGBWstrandtest) sketch code. Open the code in Arduino IDE and click the **Upload** button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message.
 
 4. The LED should cycle through Green, Red, Blue, Yellow colors, followed by Rainbow colors fade to white.    
 
@@ -129,7 +129,7 @@ George's Preliminary Pinout: 
 
 There are built-in SD card tests in Arduino ID as well. **File** > **Examples** > **SD** > **ReadWrite** is a good basic test.
 
-1. Download [SD_Test](SD_Test.ino) sketch code.. Open the code in Arduino IDE and click the **Upload** button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message. 
+1. Download [SD_Test](https://github.com/Code-and-Response/Prometeo-Firmware/tree/master/september-prototypes/SD_Test) sketch code.. Open the code in Arduino IDE and click the **Upload** button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message. 
 
 2. In the Arduino IDE menu, open **Tools** -> **Serial Monitor**
 
@@ -141,7 +141,7 @@ There are built-in SD card tests in Arduino ID as well. **File** > **Examples** 
 
 ## Part 8: Bluetooth Test
 
-Download George's testing sketch Bluetooth Test code: https://ibm.box.com/s/eyw1x2td8vtrhaoaxug3sqlgmkf93eu7 Open it in the Arduino IDE and click the 'Upload' button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message. 
+Download George's testing sketch [Bluetooth Test code](https://github.com/Code-and-Response/Prometeo-Firmware/tree/master/september-prototypes/BLE-OK) Open it in the Arduino IDE and click the 'Upload' button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message. 
 
 1. Open Bluetooth Preferences on your computer and look for "ESP32"
 
@@ -156,7 +156,7 @@ Download George's testing sketch Bluetooth Test code: https://ibm.box.com/s/eyw1
 5. Plug in LiPo Battery to set-up and try disconnecting USB from computer. Check that the "Hello World" message continues to show.
 
 BLE Test
-1. Upload the [BLE-OK](BLE-OK) sketch to your ESP32
+1. Upload the [BLE-OK](https://github.com/Code-and-Response/Prometeo-Firmware/tree/master/september-prototypes/BLE-OK) sketch to your ESP32
 
 2. You can scan your ESP32 BLE server with your smartphone and see its services and characteristics. For that, we’ll be using a free app called nRF Connect for Mobile from Nordic, it works on Android ([Google Play Store](https://play.google.com/store/apps/details?id=no.nordicsemi.android.mcp)) and iOS ([App Store](https://apps.apple.com/us/app/nrf-connect/id1054362403)). Go to Google Play Store or App Store and search for “nRF Connect for Mobile”. Install the app and open it. 
 
@@ -175,7 +175,7 @@ George's Preliminary Pinout: 
 
 CO/NO Sensor Test
 
-1. Download [MICS-4514-Test](MICS-4514-Test) sketch code. Open the code in Arduino IDE and click the 'Upload' button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message. 
+1. Download [MICS-4514-Test](https://github.com/Code-and-Response/Prometeo-Firmware/tree/master/september-prototypes/MICS-4514-Test) sketch code. Open the code in Arduino IDE and click the 'Upload' button. Wait for it to compile, upload and print the "Hard resetting via RTS pin..." message. 
    * I had to match the baud rate to get the script to work - i.e. change the line `Serial.begin(9600);` to `Serial.begin(115200);` After that, it worked like a charm --JS
 
 2. In the Arduino IDE menu, open Tools -> Serial Monitor
