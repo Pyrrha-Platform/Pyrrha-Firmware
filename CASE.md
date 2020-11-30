@@ -4,11 +4,12 @@ Instructions to come.
 
 ## Initial case design
 
-[3D STP file](case/Prometeo_20200902.stp)
+[3D STP file](case/Prometeo_2020_11_28.step)
 
-[3D STL file](case/Prometeo_tla_20200914.stl)
+Case Bottom [3D STL Bottom](case/Prometeo_2020_11_28_bottom.stl)
+Case Top [3D STL file](case/Prometeo_2020_11_28_top.stl)
 
-![ISO views](img/case-iso.png)
+![CASE](img/case.jpg)
 
-![Front/Side/Back](img/case-fsb.png)
+
 
