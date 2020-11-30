@@ -8,7 +8,7 @@ Instructions to come.
 
 [3D STL file](case/Prometeo_tla_20200914.stl)
 
-![ISO views](img/case-iso.png)
+![CASE](img/case.jpg)
 
-![Front/Side/Back](img/case-fsb.png)
+
 
