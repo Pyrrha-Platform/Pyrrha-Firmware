@@ -24,8 +24,8 @@ float vCO=0;
 float vNO2=0;
 
 //Value resistencia RO
-float r0CO=41300; ///assumed value, pending to be calibrated
-float r0NO2=1900; //assumed value, pending to be calibrated
+float r0CO= 200; ///assumed value, pending to be calibrated
+float r0NO2= 900; //assumed value, pending to be calibrated
 
 
 //Value resistencia RS
