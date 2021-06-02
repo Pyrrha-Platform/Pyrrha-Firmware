@@ -1,6 +1,6 @@
-# Prometeo firmware
+# Pyrrha firmware
 
-This repository contains the [Prometeo](https://github.com/Code-and-Response/Prometeo) solution application that targets Samsung [watches](https://github.com/Code-and-Response/Prometeo-Watch-App) paired with the sensor device and Samsung [smartphone](https://github.com/Code-and-Response/Prometeo-Mobile-App) carried by the firefighters.
+This repository contains the [Pyrrah](https://github.com/Code-and-Response/Prometeo) solution application that targets Samsung [watches](https://github.com/Code-and-Response/Prometeo-Watch-App) paired with the sensor device and Samsung [smartphone](https://github.com/Code-and-Response/Prometeo-Mobile-App) carried by the firefighters.
 
 [![License](https://img.shields.io/badge/License-Apache2-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Slack](https://img.shields.io/badge/Join-Slack-blue)](https://callforcode.org/slack)
 
@@ -12,7 +12,7 @@ This repository contains the [Prometeo](https://github.com/Code-and-Response/Pro
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting Prometeo pull requests.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting Pyrrah pull requests.
 
 ## License
 
