@@ -7,6 +7,7 @@ This repository contains the [Pyrrha](https://github.com/Pyrrha-Platform/Pyrrha)
 ## Setting up the solution
 
 * Install the Arduino IDE and connect it to a Prometeo hardware device.
+* Load the latest firmware sketch on the device.
 
 ## Contributing
 
