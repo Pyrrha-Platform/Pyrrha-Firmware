@@ -1,14 +1,12 @@
 # Pyrrha firmware
 
-This repository contains the [Pyrrha](https://github.com/Pyrrha-Platform/Pyrrha) solution application that targets Samsung [watches](https://github.com/Pyrrha-Platform/Pyrrha-Watch-App) paired with the sensor device and Samsung [smartphone](https://github.com/Pyrrha-Platform/Pyrrha-Mobile-App) carried by the firefighters.
+This repository contains the [Pyrrha](https://github.com/Pyrrha-Platform/Pyrrha) solution firmware for the [Pyrrha hardware](https://github.com/Pyrrha-Platform/Pyrrha-Hardware).
 
 [![License](https://img.shields.io/badge/License-Apache2-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Slack](https://img.shields.io/badge/Join-Slack-blue)](https://callforcode.org/slack)
 
 ## Setting up the solution
 
-* For breadboard set up, see [PROTOTYPING.md](PROTOTYPING.md)
-* For PCB board, instructions will be in [PCB.md](PCB.md)
-* For the case design, see [CASE.md](CASE.md)
+* Install the Arduino IDE and connect it to a Prometeo hardware device.
 
 ## Contributing
 
