@@ -1,12 +1,12 @@
 # Pyrrha firmware
 
+[![License](https://img.shields.io/badge/License-Apache2-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Slack](https://img.shields.io/static/v1?label=Slack&message=%23prometeo-pyrrha&color=blue)](https://callforcode.org/slack)
+
 This repository contains the [Pyrrha](https://github.com/Pyrrha-Platform/Pyrrha) solution firmware for the [Pyrrha hardware](https://github.com/Pyrrha-Platform/Pyrrha-Hardware).
 
 The firmware has undergone several iterations based on field testing of its functionality in controlled burn environments in Spain and in the labs at universities and private companies.
 
 It is now ready for a redesign to ensure it can be reliably connected with better components to withstand additional rigorous international conditions.
-
-[![License](https://img.shields.io/badge/License-Apache2-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Slack](https://img.shields.io/static/v1?label=Slack&message=%23prometeo-pyrrha&color=blue)](https://callforcode.org/slack)
 
 ## Recreating the prototype
 
