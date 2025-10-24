@@ -7,14 +7,14 @@
 #include "SPI.h"
 #include "Adafruit_NeoPixel.h"
 
-//BLE Server
-BLEServer* pServer = NULL;
-BLECharacteristic* pCharacteristic_TEMP = NULL;
-BLECharacteristic* pCharacteristic_HUM = NULL;
-BLECharacteristic* pCharacteristic_CO = NULL;
-BLECharacteristic* pCharacteristic_NO2 = NULL;
+// BLE Server
+BLEServer *pServer = NULL;
+BLECharacteristic *pCharacteristic_TEMP = NULL;
+BLECharacteristic *pCharacteristic_HUM = NULL;
+BLECharacteristic *pCharacteristic_CO = NULL;
+BLECharacteristic *pCharacteristic_NO2 = NULL;
 
-//BLE Server
+// BLE Server
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint32_t preHeatSeconds = 10;
@@ -32,44 +32,44 @@ float no2Value = 0;
 #define NO2_CHARACTERISTIC_UUID "e1e1687a-65ab-4c7e-a8ca-cab9bb1b52c2"
 
 #define DHTPIN 27     // Digital pin connected to the DHT sensor
-#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
+#define DHTTYPE DHT22 // DHT 22  (AM2302), AM2321
 DHT dht(DHTPIN, DHTTYPE);
 
-#define LED_PIN    A0 //(ESP32 could be pin #26) //mine:5
-#define LED_COUNT  1 
+#define LED_PIN A0 //(ESP32 could be pin #26) //mine:5
+#define LED_COUNT 1
 #define BRIGHTNESS 50
 Adafruit_NeoPixel statusLED(LED_COUNT, LED_PIN, NEO_GRBW + NEO_KHZ800);
 
-#define PRE_PIN          14 // Replace DigitalPin# by the number where the Pre connection of the CJMCU-4514 is connected
-#define VNOX_PIN         36 // Replace A3 by the AnalogPin# you are using
-#define VRED_PIN         39 // Replace A4 by the AnalogPin# you are using
+#define PRE_PIN 14  // Replace DigitalPin# by the number where the Pre connection of the CJMCU-4514 is connected
+#define VNOX_PIN 36 // Replace A3 by the AnalogPin# you are using
+#define VRED_PIN 39 // Replace A4 by the AnalogPin# you are using
 
 File myFile;
 
-class MyServerCallbacks: public BLEServerCallbacks 
+class MyServerCallbacks : public BLEServerCallbacks
 {
-  void onConnect(BLEServer* pServer) { deviceConnected = true; };
-  void onDisconnect(BLEServer* pServer) { deviceConnected = false; };
+  void onConnect(BLEServer *pServer) { deviceConnected = true; };
+  void onDisconnect(BLEServer *pServer) { deviceConnected = false; };
 };
 
-void setup() 
+void setup()
 {
   Serial.begin(115200);
   Serial.println("Beginning setup() here");
 
   // TODO: get timestamp from cloud / connected mobile device
- 
+
   // TODO: get name from cloud / connected mobile device
-  BLEDevice::init("Prometeo00001"); // Create the BLE Device
+  BLEDevice::init("Prometeo00001");    // Create the BLE Device
   pServer = BLEDevice::createServer(); // Create the BLE Server
   pServer->setCallbacks(new MyServerCallbacks());
   BLEService *pService = pServer->createService(PROMETEO_SERVICE_UUID); // Create the BLE Service
 
   // Create a BLE Characteristics
-  pCharacteristic_TEMP = pService->createCharacteristic( TEMP_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE );
-  pCharacteristic_HUM = pService->createCharacteristic( HUM_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE );
-  pCharacteristic_CO = pService->createCharacteristic( CO_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE );
-  pCharacteristic_NO2 = pService->createCharacteristic( NO2_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE );
+  pCharacteristic_TEMP = pService->createCharacteristic(TEMP_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
+  pCharacteristic_HUM = pService->createCharacteristic(HUM_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
+  pCharacteristic_CO = pService->createCharacteristic(CO_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
+  pCharacteristic_NO2 = pService->createCharacteristic(NO2_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
 
   // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
   // Create a BLE Descriptor
@@ -91,48 +91,49 @@ void setup()
 
   // Initialize SD card...
   Serial.println("Initializing SD card...");
-  if(!SD.begin(4)) // 4 in some setups, 33 in others
+  if (!SD.begin(4)) // 4 in some setups, 33 in others
   {
     Serial.println("SD card initialization failed!");
-    while (1);
+    while (1)
+      ;
   }
   Serial.println("SD card initialized.");
   // TODO: Name file according to firefighterID and timestamp
 
-  // Turn on LED 
+  // Turn on LED
   // TODO: Add connectivity status LED
   Serial.println("Turning on LED");
-  statusLED.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
+  statusLED.begin();                                      // INITIALIZE NeoPixel strip object (REQUIRED)
   statusLED.setPixelColor(0, statusLED.Color(0, 0, 255)); // Blue
-  statusLED.show();            // Turn OFF all pixels ASAP
-  statusLED.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+  statusLED.show();                                       // Turn OFF all pixels ASAP
+  statusLED.setBrightness(50);                            // Set BRIGHTNESS to about 1/5 (max = 255)
 
   // Turn on dht22 temp/hum sensor
   dht.begin();
 
   // set up MiCS-4514 gas sensor
-  pinMode(PRE_PIN, OUTPUT); //set preheat pin
+  pinMode(PRE_PIN, OUTPUT); // set preheat pin
 
   Serial.println("Finished setup() here");
   Serial.println("");
-  
-} //end setup()
 
-void loop() 
+} // end setup()
+
+void loop()
 {
 
-  //Preheat gas sensor
+  // Preheat gas sensor
   Serial.println("Preheating gas sensor...");
   digitalWrite(PRE_PIN, 1);
-  
-  //Average temp and humidity values for 10 seconds
+
+  // Average temp and humidity values for 10 seconds
   float sumTemp = 0;
   float sumHum = 0;
   uint32_t count = 0;
-  //uint32_t preHeatTime = preHeatSeconds*1000;
-  while(count < preHeatSeconds)
+  // uint32_t preHeatTime = preHeatSeconds*1000;
+  while (count < preHeatSeconds)
   {
-    sumTemp = sumTemp + dht.readTemperature(); //temp in Celsius; for temp in Fahrenheit, use dht.readTemperature(true);
+    sumTemp = sumTemp + dht.readTemperature(); // temp in Celsius; for temp in Fahrenheit, use dht.readTemperature(true);
     sumHum = sumHum + dht.readHumidity();
     delay(1000);
     count++;
@@ -145,8 +146,8 @@ void loop()
 
   Serial.print(" # Avg Humidity: ");
   Serial.println(humValue);
-  
-  //Average gas sensor values for 10 seconds
+
+  // Average gas sensor values for 10 seconds
   digitalWrite(PRE_PIN, 0);
   Serial.println("Done with preheat. Measuring gases...");
 
@@ -169,7 +170,7 @@ void loop()
   Serial.print(" # Avg Vno2: ");
   Serial.println(no2Value, DEC);
 
-  //Build the payload to send to SD card
+  // Build the payload to send to SD card
   String payload = "Temperature: ";
   payload += tempValue;
   payload += "C, Humidity: ";
@@ -180,82 +181,83 @@ void loop()
   payload += no2Value;
   payload += " # ";
 
-  //Write characteristic values to SD card
+  // Write characteristic values to SD card
   Serial.println("Writing payload to SD card...");
   Serial.println(payload);
-  //call SD card write function here
+  // call SD card write function here
   myFile = SD.open("/test.txt", FILE_WRITE);
-  if(myFile)
+  if (myFile)
   {
     myFile.println(payload);
     myFile.close();
     Serial.println("SD card write successful");
-  } else {
+  }
+  else
+  {
     Serial.println("SD card write failed");
   }
-  
+
   // Notify device of new values
-  if (deviceConnected) 
+  if (deviceConnected)
   {
 
-  Serial.println("Transmitting characteristics...");
-  uint32_t btDelay = 3; //bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
+    Serial.println("Transmitting characteristics...");
+    uint32_t btDelay = 3; // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
 
-  notify_value(tempValue, pCharacteristic_TEMP); // Send Temperature to the BLE Client
-  delay(btDelay); 
-  notify_value(humValue, pCharacteristic_HUM); // Send Humidity to the BLE Client
-  delay(btDelay);
-  notify_value(coValue, pCharacteristic_CO); // Send CO to the BLE Client
-  delay(btDelay); 
-  notify_value(no2Value, pCharacteristic_NO2); // Send NO2 to the BLE Client
-  delay(btDelay); 
+    notify_value(tempValue, pCharacteristic_TEMP); // Send Temperature to the BLE Client
+    delay(btDelay);
+    notify_value(humValue, pCharacteristic_HUM); // Send Humidity to the BLE Client
+    delay(btDelay);
+    notify_value(coValue, pCharacteristic_CO); // Send CO to the BLE Client
+    delay(btDelay);
+    notify_value(no2Value, pCharacteristic_NO2); // Send NO2 to the BLE Client
+    delay(btDelay);
 
-  } //end if(deviceConnected)
-  //TODO: not sure if this part needs updating/what it's trying to do
-  // Disconnecting
-  else if (!deviceConnected && oldDeviceConnected) 
+  } // end if(deviceConnected)
+  // TODO: not sure if this part needs updating/what it's trying to do
+  //  Disconnecting
+  else if (!deviceConnected && oldDeviceConnected)
   {
-    delay(500); // give the bluetooth stack the chance to get things ready
+    delay(500);                  // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising(); // restart advertising
     Serial.println("start advertising");
     oldDeviceConnected = deviceConnected;
   }
   // Connecting
-  else if (deviceConnected && !oldDeviceConnected) 
+  else if (deviceConnected && !oldDeviceConnected)
   {
-  // do stuff here on connecting
-    oldDeviceConnected = deviceConnected; 
+    // do stuff here on connecting
+    oldDeviceConnected = deviceConnected;
   }
 
-  //TODO: update LED color based on thresholds
+  // TODO: update LED color based on thresholds
   updateStatusLED(no2Value);
 
-  //some programmable delay between measurements - for now 30s
+  // some programmable delay between measurements - for now 30s
   Serial.println("Characteristics sent. Delaying 30 seconds...");
   Serial.println("");
   delay(30000);
-  
-} //end loop()
 
-void notify_value (int value, BLECharacteristic* pCharacteristic)
+} // end loop()
+
+void notify_value(int value, BLECharacteristic *pCharacteristic)
 {
-  pCharacteristic->setValue((uint8_t*)&value, 4);
+  pCharacteristic->setValue((uint8_t *)&value, 4);
   pCharacteristic->notify();
 }
 
-void updateStatusLED(float no2) 
+void updateStatusLED(float no2)
 {
-  //TODO: have this actually based on thresholds for each value / machine learning data 
-  //no2 voltage > 1700 is just for testing
-  if ( no2 > 1720)
+  // TODO: have this actually based on thresholds for each value / machine learning data
+  // no2 voltage > 1700 is just for testing
+  if (no2 > 1720)
   {
     statusLED.setPixelColor(0, statusLED.Color(255, 0, 0)); // Green
     statusLED.show();
-    
   }
   else
   {
     statusLED.setPixelColor(0, statusLED.Color(0, 255, 0)); // Red
     statusLED.show();
   }
-} 
+}
