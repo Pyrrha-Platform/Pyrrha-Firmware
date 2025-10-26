@@ -1,9 +1,11 @@
 #include "BluetoothSerial.h"
 BluetoothSerial SerialBT;
-void setup() {
+void setup()
+{
   SerialBT.begin("ESP32");
 }
-void loop() {
+void loop()
+{
   SerialBT.println("hello world");
   delay(1000);
 }

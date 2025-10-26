@@ -27,8 +27,8 @@ bool sent_to_client = false; // flag to know if we sent the data to the mobile o
 
 // Global Variables definition
 // Variables to put the readings from the sensors
-uint32_t preHeatSeconds = 30; //30 second preheat advised
-uint32_t measureSeconds = 2;  //configurable, 10-60 seconds
+uint32_t preHeatSeconds = 30; // 30 second preheat advised
+uint32_t measureSeconds = 2;  // configurable, 10-60 seconds
 float tempValue = 0;
 float humValue = 0;
 float coValue = 0;
@@ -39,11 +39,11 @@ float tempValueStDev = 0;
 float humValueStDev = 0;
 float coValueStDev = 0;
 float no2ValueStDev = 0;
-float tempThreshold = 80; //80C is max temperature rating for Prometeo device
-float coThreshold = 420;  //420ppm is AEGL2 10-minute limit
-float no2Threshold = 8;   //20ppm is AEGL2 10-minute limit; 8ppm is the limit Joan suggested
-float coSensorMax = 1000; //1000ppm is the max value it's rated for
-float no2SensorMax = 10;  //10ppm is the max value it's rated for
+float tempThreshold = 80; // 80C is max temperature rating for Prometeo device
+float coThreshold = 420;  // 420ppm is AEGL2 10-minute limit
+float no2Threshold = 8;   // 20ppm is AEGL2 10-minute limit; 8ppm is the limit Joan suggested
+float coSensorMax = 1000; // 1000ppm is the max value it's rated for
+float no2SensorMax = 10;  // 10ppm is the max value it's rated for
 float tempArray[10];
 float coArray[10];
 float no2Array[10];
@@ -53,8 +53,8 @@ int colourLED = 0; // 1 - green, 2 - yellow, 3 - red
 
 // sensorValues is the variable where we put readings from all sensors
 char sensorValues[80] = "";
-//char sensorValues_Card[40]; //***Marco generé este array sólo para agregar los valores de RS al CARD, creyendo que si lo agrego a "sensorValues" podría generar alguna incongruencia en tu Android App.
-//Si no pasa nada, la borramos e incluimos todo en sensorValues
+// char sensorValues_Card[40]; //***Marco generé este array sólo para agregar los valores de RS al CARD, creyendo que si lo agrego a "sensorValues" podría generar alguna incongruencia en tu Android App.
+// Si no pasa nada, la borramos e incluimos todo en sensorValues
 String date_time;
 
 //  DHT22 configuration
@@ -72,35 +72,35 @@ Adafruit_NeoPixel connectLED(LED_COUNT, connectLED_PIN, NEO_GRBW + NEO_KHZ800);
 String status_cloud;
 
 //  SD CARD ChipSelect PIN configuration
-#define CS_PIN 33 //4 in some setups, 33 in others
+#define CS_PIN 33 // 4 in some setups, 33 in others
 
 // CJMCU-4541 configuration
 #define PRE_PIN 14   // Replace DigitalPin# by the number where the Pre connection of the CJMCU-4514 is connected
 #define vNO2X_PIN 36 // Replace A3 by the AnalogPin# you are using
 #define VRED_PIN 39  // Replace A4 by the AnalogPin# you are using
 
-//AnalogRead()
+// AnalogRead()
 int co = 0;
 int no2 = 0;
 
-//Voltaje value read with AnalogRead()
+// Voltaje value read with AnalogRead()
 float vCO = 0;
 float vNO2 = 0;
 
-//Value of Resistence RO
+// Value of Resistence RO
 float r0CO = 41377;
-//float r0CO=475116; // with draeger but not real
-float r0NO2 = 900; //assumed value, pending to be calibrated
+// float r0CO=475116; // with draeger but not real
+float r0NO2 = 900; // assumed value, pending to be calibrated
 
-//Value of Sensor Resistence RS
+// Value of Sensor Resistence RS
 float rsCO = 0;
 float rsNO2 = 0;
 
-//Ratio Rs/Ro
+// Ratio Rs/Ro
 float ratioCO = 0;
 float ratioNO2 = 0;
 
-//ppm Calculation variables
+// ppm Calculation variables
 double ppmCO = 0;
 double ppmNO2 = 0;
 
@@ -113,7 +113,7 @@ class MyServerCallbacks : public BLEServerCallbacks
 };
 
 // With this kind of classes we can identify if the client app is writing a characteristic and we can take actions.
-//In this case we get the Date and Time from the mobile app
+// In this case we get the Date and Time from the mobile app
 class MyCallbacksDateTime : public BLECharacteristicCallbacks
 {
   void onWrite(BLECharacteristic *pCharacteristic)
@@ -161,7 +161,7 @@ class MyCallbacksStatusCloud : public BLECharacteristicCallbacks
 // Function for reading sensor values and taking average over set seconds
 void readSensors()
 {
-  //variables
+  // variables
   float sumTemp = 0;
   float sumHum = 0;
   float sumCO = 0;
@@ -175,34 +175,34 @@ void readSensors()
   float coStDevArray[measureSeconds];
   float no2StDevArray[measureSeconds];
 
-  //Average temp, humidity, and gas values over number of seconds (measureSeconds)
+  // Average temp, humidity, and gas values over number of seconds (measureSeconds)
   while (count < measureSeconds)
   {
-    //read temp/humidity sensor
-    float temp = dht.readTemperature(); //temp in Celsius; for temp in Fahrenheit, use dht.readTemperature(true);
+    // read temp/humidity sensor
+    float temp = dht.readTemperature(); // temp in Celsius; for temp in Fahrenheit, use dht.readTemperature(true);
     float hum = dht.readHumidity();
     sumTemp = sumTemp + temp;
     sumHum = sumHum + hum;
     tempStDevArray[count] = temp;
     humStDevArray[count] = hum;
 
-    //Get Data from sensor CJMCU-4541
+    // Get Data from sensor CJMCU-4541
     co = analogRead(VRED_PIN);
     no2 = analogRead(vNO2X_PIN);
 
-    //Convert to voltage
-    vCO = (3.3 * co) / 4096; //ESP32 Feather works at 3.3 volts & 12bits of Resolution(2^12 = 4096)
+    // Convert to voltage
+    vCO = (3.3 * co) / 4096; // ESP32 Feather works at 3.3 volts & 12bits of Resolution(2^12 = 4096)
     vNO2 = (3.3 * no2) / 4096;
 
-    //Convert to resistance
-    rsCO = 47000 * (3.3 - vCO) / vCO;    //load resistor 47kohm
-    rsNO2 = 22000 * (3.3 - vNO2) / vNO2; //load resistor 22kohm
+    // Convert to resistance
+    rsCO = 47000 * (3.3 - vCO) / vCO;    // load resistor 47kohm
+    rsNO2 = 22000 * (3.3 - vNO2) / vNO2; // load resistor 22kohm
 
-    //Ratio Rs/RO (Convert to indicator concentration)
+    // Ratio Rs/RO (Convert to indicator concentration)
     ratioCO = rsCO / r0CO;
     ratioNO2 = rsNO2 / r0NO2;
 
-    //PPM Calculation
+    // PPM Calculation
     ppmCO = pow(10, -1.1859 * log10(ratioCO) + 0.6201);
     ppmNO2 = pow(10, 0.9682 * log10(ratioNO2) - 0.8108);
     Serial.print("CO : ");
@@ -234,24 +234,24 @@ void readSensors()
     sumCO = sumCO + ppmCO;
     sumNO2 = sumNO2 + ppmNO2;
 
-    //Added sumRsCO and sumRsNO2
+    // Added sumRsCO and sumRsNO2
     sumRsCO = sumRsCO + rsCO;
     sumRsNO2 = sumRsNO2 + rsNO2;
 
     coStDevArray[count] = ppmCO;
     no2StDevArray[count] = ppmNO2;
 
-    delay(10000); //delay = 10 second
+    delay(10000); // delay = 10 second
     count++;
   }
 
-  //calculate averages
+  // calculate averages
   tempValue = sumTemp / count;
   humValue = sumHum / count;
   coValue = sumCO / count;
   no2Value = sumNO2 / count;
-  rsCOValue = sumRsCO / count;   //added average of RsCO
-  rsNO2Value = sumRsNO2 / count; //added average of RsNO2
+  rsCOValue = sumRsCO / count;   // added average of RsCO
+  rsNO2Value = sumRsNO2 / count; // added average of RsNO2
 
   int stdevCOunt = 0;
   float sumSDTemp = 0;
@@ -259,11 +259,11 @@ void readSensors()
   float sumSDCO = 0;
   float sumSDNO2 = 0;
 
-  //calculate standard deviations
-  //loop through arrays
+  // calculate standard deviations
+  // loop through arrays
   while (stdevCOunt < measureSeconds)
   {
-    //take array[count] - average, square it
+    // take array[count] - average, square it
     float sdTemp = tempStDevArray[stdevCOunt] - tempValue;
     sdTemp = sdTemp * sdTemp;
     float sdHum = humStDevArray[stdevCOunt] - humValue;
@@ -273,7 +273,7 @@ void readSensors()
     float sdNO2 = no2StDevArray[stdevCOunt] - no2Value;
     sdNO2 = sdNO2 * sdNO2;
 
-    //add new value to sum
+    // add new value to sum
     sumSDTemp = sumSDTemp + sdTemp;
     sumSDHum = sumSDHum + sdHum;
     sumSDCO = sumSDCO + sdCO;
@@ -282,7 +282,7 @@ void readSensors()
     stdevCOunt++;
   }
 
-  //take sum/values, take square root of result
+  // take sum/values, take square root of result
   tempValueStDev = sqrt(sumSDTemp / measureSeconds);
   humValueStDev = sqrt(sumSDHum / measureSeconds);
   coValueStDev = sqrt(sumSDCO / measureSeconds);
@@ -322,7 +322,7 @@ void readSensors()
   Serial.print(no2Value);
   Serial.print(" StDev NO2: ");
   Serial.println(no2ValueStDev);
-  //Added RS values for CO and NO2
+  // Added RS values for CO and NO2
   Serial.print("Avg RsCO: ");
   Serial.print(rsCOValue);
   Serial.print(" # Avg RsNO2: ");
@@ -344,7 +344,7 @@ void readSensors()
   Serial.println(" ####### DEBUG ##### ");
   Serial.println("");
 
-} //end readSensors()
+} // end readSensors()
 
 // Procedure to write the data into the SD Card
 // TO-DO: write the values into the SD Card identified by date_time of the first reading. It has to use rotational files
@@ -397,16 +397,16 @@ void writeSDCard(fs::FS &fs, const char *path, const char *message)
   file.close();
   Serial.println("SD card write successful");
 
-} //end writeSDCard()
+} // end writeSDCard()
 
 void updateStatusLED()
 {
-  //Update array values with new data
+  // Update array values with new data
   tempArray[arrayIndex] = tempValue;
   coArray[arrayIndex] = coValue;
   no2Array[arrayIndex] = no2Value;
 
-  //Get new averages
+  // Get new averages
   float tempSum = 0;
   float coSum = 0;
   float no2Sum = 0;
@@ -431,7 +431,7 @@ void updateStatusLED()
     Serial.print(" NO2 10min Avg:");
     Serial.println(no2Avg);
 
-    //Check averages against thresholds
+    // Check averages against thresholds
     if ((tempAvg > tempThreshold) || (coAvg > coThreshold) || (no2Avg > no2Threshold))
     {
       Serial.println("Value over threshold, display red LED");
@@ -441,37 +441,37 @@ void updateStatusLED()
     {
       colourLED = 1; // green
     }
-  } //end if(afterFirst10Mins)
+  } // end if(afterFirst10Mins)
 
   if (deviceConnected) // the mobile app has priority
   {
     colourLED = status_cloud.toInt(); // 1 - green, 2 - yellow, 3 - red
   }
 
-  //Change LED colors
+  // Change LED colors
   switch (colourLED)
   {
   case 3: // red
-    //statusLED.setPixelColor(0, statusLED.Color(0, 255, 0)); // Red
+    // statusLED.setPixelColor(0, statusLED.Color(0, 255, 0)); // Red
     colorWipeStatusLED(statusLED.Color(0, 255, 0), 5); // Red
     statusLED.show();
     Serial.println("LED colour is red");
     break;
   case 2: // yellow
-    //statusLED.setPixelColor(0, statusLED.Color(255, 255, 0)); //Yellow?
+    // statusLED.setPixelColor(0, statusLED.Color(255, 255, 0)); //Yellow?
     colorWipeStatusLED(statusLED.Color(255, 255, 0), 5); // Yellow?
     statusLED.show();
     Serial.println("LED colour is yellow");
     break;
   case 1: // green
-    //statusLED.setPixelColor(0, statusLED.Color(0, 0, 255)); // Green
+    // statusLED.setPixelColor(0, statusLED.Color(0, 0, 255)); // Green
     colorWipeStatusLED(statusLED.Color(255, 0, 0), 5); // Green
     statusLED.show();
     Serial.println("LED colour is green");
     break;
   }
 
-  //Update array index
+  // Update array index
   if (arrayIndex < 9)
   {
     arrayIndex++;
@@ -481,16 +481,16 @@ void updateStatusLED()
     arrayIndex = 0;
     afterFirst10Mins = true;
   }
-} //end updateStatusLED()
+} // end updateStatusLED()
 
-//initial setup
+// initial setup
 void setup()
 {
   Serial.println("Initial setup - begin");
   Serial.begin(115200);
   analogReadResolution(12);
 
-  //Define Prometeo ID including MAC Address
+  // Define Prometeo ID including MAC Address
   prometeoID = "Prometeo-" + WiFi.macAddress();
   Serial.println("This device is " + prometeoID);
 
@@ -572,9 +572,9 @@ void setup()
   dht.begin();
 
   // set up MiCS-4514 gas sensor
-  pinMode(PRE_PIN, OUTPUT); //set preheat pin
+  pinMode(PRE_PIN, OUTPUT); // set preheat pin
 
-  //Preheat gas sensor
+  // Preheat gas sensor
   Serial.println("Preheating gas sensor...");
   digitalWrite(PRE_PIN, 1);
   int count = 0;
@@ -612,7 +612,7 @@ void loop()
   else
   {
     Serial.println("Bluetooth not connected");
-    //connectLED.setPixelColor(0, connectLED.Color(0, 0, 255)); // Blue
+    // connectLED.setPixelColor(0, connectLED.Color(0, 0, 255)); // Blue
     colorWipeConnectLED(connectLED.Color(0, 0, 0), 5); // Off?
     connectLED.setBrightness(10);                      // Set BRIGHTNESS low - needed if it's off?
   }
@@ -643,17 +643,17 @@ void loop()
   //  writeSDCard(SD, "/sensorsReadingData.txt", date_time.c_str());
   writeSDCard(SD, "/sensorsReadingData.txt", sensorValues); // sensorValues modified to include RsCO and RsNO2
 
-  //update LED color based on thresholds
+  // update LED color based on thresholds
   updateStatusLED();
 
-  //TODO: do we need this? Serial.println("Characteristics sent.");
+  // TODO: do we need this? Serial.println("Characteristics sent.");
 
   uint32_t delaySeconds = (60 - measureSeconds) * 100 * 3;
   delay(delaySeconds);
   Serial.println("loop - end");
   Serial.println(" ");
 
-} //end loop
+} // end loop
 
 void colorWipeStatusLED(uint32_t color, int wait)
 {
