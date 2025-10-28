@@ -1,24 +1,85 @@
-name: linter
+name: C/C++ Arduino Linting
 
 on:
-  # Execute on every push to any branch
   push:
-    branches:
-      - "**"
-  # Execute on every pull request to the master branch
+    branches: ["**"]
   pull_request_target:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  linter:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm install -g prettier@latest
-      - run: prettier --check .
+      - name: Install C/C++ tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Format check with clang-format
+        run: |
+          # Find C/C++/Arduino files
+          CPP_FILES=$(find . -name "*.cpp" -o -name "*.c" -o -name "*.h" -o -name "*.hpp" -o -name "*.ino" | grep -v ".git")
+          
+          if [ -n "$CPP_FILES" ]; then
+            echo "Checking C/C++/Arduino formatting..."
+            FORMAT_ISSUES=0
+            
+            for file in $CPP_FILES; do
+              if ! clang-format -style="{BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 100}" "$file" | diff -u "$file" - > /dev/null; then
+                echo "❌ Format issues in: $file"
+                FORMAT_ISSUES=$((FORMAT_ISSUES + 1))
+              fi
+            done
+            
+            if [ $FORMAT_ISSUES -eq 0 ]; then
+              echo "✅ All files properly formatted"
+            else
+              echo "❌ $FORMAT_ISSUES files need formatting"
+              exit 1
+            fi
+          else
+            echo "No C/C++/Arduino files found"
+          fi
+
+      - name: Arduino project validation
+        run: |
+          # Check for Arduino project structure
+          if find . -name "*.ino" | head -1 | grep -q .; then
+            echo "📱 Arduino project detected"
+            
+            # Basic Arduino file validation
+            INO_FILES=$(find . -name "*.ino")
+            for file in $INO_FILES; do
+              if ! grep -q "void setup()" "$file" && ! grep -q "void loop()" "$file"; then
+                echo "⚠️ $file may be missing setup() or loop() functions"
+              fi
+            done
+            
+            # Check for common issues
+            if grep -r "delay([0-9][0-9][0-9][0-9]" . --include="*.ino" > /dev/null; then
+              echo "⚠️ Long delay() calls found - consider non-blocking alternatives"
+            fi
+          fi
+
+      - name: Code quality analysis
+        run: |
+          CPP_FILES=$(find . -name "*.cpp" -o -name "*.c" -o -name "*.h" -o -name "*.hpp" -o -name "*.ino" | grep -v ".git")
+          
+          if [ -n "$CPP_FILES" ]; then
+            TOTAL_LINES=$(echo "$CPP_FILES" | xargs wc -l | tail -1 | awk '{print $1}')
+            FILE_COUNT=$(echo "$CPP_FILES" | wc -l)
+            
+            echo "📈 Code statistics:"
+            echo "   📁 Files: $FILE_COUNT"  
+            echo "   📝 Lines: $TOTAL_LINES"
+            
+            # Check for large files
+            for file in $CPP_FILES; do
+              LINES=$(wc -l < "$file")
+              if [ $LINES -gt 500 ]; then
+                echo "⚠️ Large file ($LINES lines): $file - consider splitting"
+              fi
+            done
+          fi
