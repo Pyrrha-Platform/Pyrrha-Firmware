@@ -2,15 +2,13 @@
 
 DHTesp dht;
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
 
   dht.setup(27, DHTesp::DHT22);
 }
 
-void loop()
-{
+void loop() {
   float temperature = dht.getTemperature();
 
   Serial.print("Temperature: ");

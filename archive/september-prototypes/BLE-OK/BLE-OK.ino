@@ -1,7 +1,7 @@
+#include <BLE2902.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
-#include <BLE2902.h>
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pCharacteristic_TEMP = NULL;
@@ -28,21 +28,13 @@ uint32_t value = 0;
 #define BEN_CHARACTERISTIC_UUID "b973c55d-4932-4e51-8bc4-158bf3b57071"
 #define ACR_CHARACTERISTIC_UUID "8c232843-fcb9-49c2-b453-13adefad921a"
 
-class MyServerCallbacks : public BLEServerCallbacks
-{
-  void onConnect(BLEServer *pServer)
-  {
-    deviceConnected = true;
-  };
+class MyServerCallbacks : public BLEServerCallbacks {
+  void onConnect(BLEServer *pServer) { deviceConnected = true; };
 
-  void onDisconnect(BLEServer *pServer)
-  {
-    deviceConnected = false;
-  }
+  void onDisconnect(BLEServer *pServer) { deviceConnected = false; }
 };
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
 
   // Create the BLE Device
@@ -56,46 +48,39 @@ void setup()
   BLEService *pService = pServer->createService(PROMETEO_SERVICE_UUID);
 
   // Create a BLE Characteristic
-  pCharacteristic_TEMP = pService->createCharacteristic(
-      TEMP_CHARACTERISTIC_UUID,
-      BLECharacteristic::PROPERTY_READ |
-          BLECharacteristic::PROPERTY_NOTIFY |
-          BLECharacteristic::PROPERTY_INDICATE);
-  pCharacteristic_HUM = pService->createCharacteristic(
-      HUM_CHARACTERISTIC_UUID,
-      BLECharacteristic::PROPERTY_READ |
-          BLECharacteristic::PROPERTY_NOTIFY |
-          BLECharacteristic::PROPERTY_INDICATE);
+  pCharacteristic_TEMP = pService->createCharacteristic(TEMP_CHARACTERISTIC_UUID,
+                                                        BLECharacteristic::PROPERTY_READ |
+                                                            BLECharacteristic::PROPERTY_NOTIFY |
+                                                            BLECharacteristic::PROPERTY_INDICATE);
+  pCharacteristic_HUM = pService->createCharacteristic(HUM_CHARACTERISTIC_UUID,
+                                                       BLECharacteristic::PROPERTY_READ |
+                                                           BLECharacteristic::PROPERTY_NOTIFY |
+                                                           BLECharacteristic::PROPERTY_INDICATE);
 
-  pCharacteristic_CO = pService->createCharacteristic(
-      CO_CHARACTERISTIC_UUID,
-      BLECharacteristic::PROPERTY_READ |
-          BLECharacteristic::PROPERTY_NOTIFY |
-          BLECharacteristic::PROPERTY_INDICATE);
+  pCharacteristic_CO = pService->createCharacteristic(CO_CHARACTERISTIC_UUID,
+                                                      BLECharacteristic::PROPERTY_READ |
+                                                          BLECharacteristic::PROPERTY_NOTIFY |
+                                                          BLECharacteristic::PROPERTY_INDICATE);
 
-  pCharacteristic_NO2 = pService->createCharacteristic(
-      NO2_CHARACTERISTIC_UUID,
-      BLECharacteristic::PROPERTY_READ |
-          BLECharacteristic::PROPERTY_NOTIFY |
-          BLECharacteristic::PROPERTY_INDICATE);
+  pCharacteristic_NO2 = pService->createCharacteristic(NO2_CHARACTERISTIC_UUID,
+                                                       BLECharacteristic::PROPERTY_READ |
+                                                           BLECharacteristic::PROPERTY_NOTIFY |
+                                                           BLECharacteristic::PROPERTY_INDICATE);
 
-  pCharacteristic_FOR = pService->createCharacteristic(
-      FOR_CHARACTERISTIC_UUID,
-      BLECharacteristic::PROPERTY_READ |
-          BLECharacteristic::PROPERTY_NOTIFY |
-          BLECharacteristic::PROPERTY_INDICATE);
+  pCharacteristic_FOR = pService->createCharacteristic(FOR_CHARACTERISTIC_UUID,
+                                                       BLECharacteristic::PROPERTY_READ |
+                                                           BLECharacteristic::PROPERTY_NOTIFY |
+                                                           BLECharacteristic::PROPERTY_INDICATE);
 
-  pCharacteristic_BEN = pService->createCharacteristic(
-      BEN_CHARACTERISTIC_UUID,
-      BLECharacteristic::PROPERTY_READ |
-          BLECharacteristic::PROPERTY_NOTIFY |
-          BLECharacteristic::PROPERTY_INDICATE);
+  pCharacteristic_BEN = pService->createCharacteristic(BEN_CHARACTERISTIC_UUID,
+                                                       BLECharacteristic::PROPERTY_READ |
+                                                           BLECharacteristic::PROPERTY_NOTIFY |
+                                                           BLECharacteristic::PROPERTY_INDICATE);
 
-  pCharacteristic_ACR = pService->createCharacteristic(
-      ACR_CHARACTERISTIC_UUID,
-      BLECharacteristic::PROPERTY_READ |
-          BLECharacteristic::PROPERTY_NOTIFY |
-          BLECharacteristic::PROPERTY_INDICATE);
+  pCharacteristic_ACR = pService->createCharacteristic(ACR_CHARACTERISTIC_UUID,
+                                                       BLECharacteristic::PROPERTY_READ |
+                                                           BLECharacteristic::PROPERTY_NOTIFY |
+                                                           BLECharacteristic::PROPERTY_INDICATE);
   // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
   // Create a BLE Descriptor
   pCharacteristic_TEMP->addDescriptor(new BLE2902());
@@ -119,59 +104,62 @@ void setup()
   Serial.println("Waiting a client connection to notify...");
 }
 
-void notify_value(int value, BLECharacteristic *pCharacteristic)
-{
+void notify_value(int value, BLECharacteristic *pCharacteristic) {
   pCharacteristic->setValue((uint8_t *)&value, 4);
   pCharacteristic->notify();
 }
 
-void loop()
-{
+void loop() {
   // notify changed value
-  if (deviceConnected)
-  {
+  if (deviceConnected) {
 
     // Send Temperature to the BLE Client
     value = random(0, 100);
     notify_value(value, pCharacteristic_TEMP);
     Serial.print("Temperature: ");
     Serial.print(value);
-    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
+    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours
+              // test i was able to go as low as 3ms
 
     // Send Humidity to the BLE Client
     value = random(0, 100);
     notify_value(value, pCharacteristic_HUM);
     Serial.print(" # Humidity: ");
     Serial.print(value);
-    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
+    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours
+              // test i was able to go as low as 3ms
 
     // Send CO to the BLE Client
     value = random(0, 100);
     notify_value(value, pCharacteristic_CO);
     Serial.print(" # CO: ");
     Serial.print(value);
-    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
+    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours
+              // test i was able to go as low as 3ms
 
     // Send NO2 to the BLE Client
     value = random(0, 100);
     notify_value(value, pCharacteristic_NO2);
     Serial.print(" # NO2: ");
     Serial.print(value);
-    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
+    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours
+              // test i was able to go as low as 3ms
 
     // Send Formaldehyde to the BLE Client
     value = random(0, 100);
     notify_value(value, pCharacteristic_FOR);
     Serial.print(" # Formaldehyde: ");
     Serial.print(value);
-    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
+    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours
+              // test i was able to go as low as 3ms
 
     // Send Benzene to the BLE Client
     value = random(0, 100);
     notify_value(value, pCharacteristic_BEN);
     Serial.print(" # Benzene: ");
     Serial.print(value);
-    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
+    delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours
+              // test i was able to go as low as 3ms
 
     // Send Acroleine to the BLE Client
     value = random(0, 100);
@@ -181,16 +169,14 @@ void loop()
     delay(300); // We wait 300 ms to update
   }
   // disconnecting
-  if (!deviceConnected && oldDeviceConnected)
-  {
+  if (!deviceConnected && oldDeviceConnected) {
     delay(500);                  // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising(); // restart advertising
     Serial.println("start advertising");
     oldDeviceConnected = deviceConnected;
   }
   // connecting
-  if (deviceConnected && !oldDeviceConnected)
-  {
+  if (deviceConnected && !oldDeviceConnected) {
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
   }

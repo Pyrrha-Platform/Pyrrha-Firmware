@@ -12,8 +12,7 @@
 int vnox_value = 0;
 int vred_value = 0;
 
-void setup()
-{
+void setup() {
 
   // Setup preheater pin
   pinMode(PRE_PIN, OUTPUT);
@@ -30,8 +29,7 @@ void setup()
   Serial.println("Done");
 }
 
-void loop()
-{
+void loop() {
 
   // Read analog values, print them out, and wait
   vnox_value = analogRead(VNOX_PIN);
