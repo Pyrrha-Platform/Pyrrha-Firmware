@@ -1,12 +1,12 @@
 
-#include <BLEDevice.h>
-#include <BLEServer.h>
-#include <BLEUtils.h>
-#include <BLE2902.h>
+#include "Adafruit_NeoPixel.h"
 #include "DHT.h"
 #include "SD.h"
 #include "SPI.h"
-#include "Adafruit_NeoPixel.h"
+#include <BLE2902.h>
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
 
 // Bluetooth Low Energy configuration
 BLEServer *pServer = NULL;
@@ -16,9 +16,14 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 bool sent_to_client = false; // flag to know if we sent the data to the mobile or not
 // See the following for generating UUIDs:https://www.uuidgenerator.net/
-#define PROMETEO_SERVICE_UUID "2c32fd5f-5082-437e-8501-959d23d3d2fb"         // BLE: UUID of the Prometeo Service
-#define SENSORS_CHARACTERISTIC_UUID "dcaaccb4-c1d1-4bc4-b406-8f6f45df0208"   // BLE: UUID for sensors characteristic(all sensors readings in only one characteristic)
-#define DATE_TIME_CHARACTERISTIC_UUID "e39c34e9-d574-47fc-a66e-425cec812aab" // BLE: UUID for the Date and Time characteristic, we are going to get this value from the mobile
+#define PROMETEO_SERVICE_UUID                                                                      \
+  "2c32fd5f-5082-437e-8501-959d23d3d2fb" // BLE: UUID of the Prometeo Service
+#define SENSORS_CHARACTERISTIC_UUID                                                                \
+  "dcaaccb4-c1d1-4bc4-b406-8f6f45df0208" // BLE: UUID for sensors characteristic(all sensors
+                                         // readings in only one characteristic)
+#define DATE_TIME_CHARACTERISTIC_UUID                                                              \
+  "e39c34e9-d574-47fc-a66e-425cec812aab" // BLE: UUID for the Date and Time characteristic, we are
+                                         // going to get this value from the mobile
 
 // Global Variables definition
 // Variables to put the readings from the sensors
@@ -59,7 +64,8 @@ Adafruit_NeoPixel connectLED(LED_COUNT, connectLED_PIN, NEO_GRBW + NEO_KHZ800);
 #define CS_PIN 33 // 4 in some setups, 33 in others
 
 // CJMCU-4541 configuration
-#define PRE_PIN 14  // Replace DigitalPin# by the number where the Pre connection of the CJMCU-4514 is connected
+#define PRE_PIN                                                                                    \
+  14 // Replace DigitalPin# by the number where the Pre connection of the CJMCU-4514 is connected
 #define VNOX_PIN 36 // Replace A3 by the AnalogPin# you are using
 #define VRED_PIN 39 // Replace A4 by the AnalogPin# you are using
 // analog read
@@ -85,25 +91,20 @@ float ppmNO2 = 0;
 //  Functions Definition
 
 // Needed to know if a device is connected or not (deviceConnected flag)
-class MyServerCallbacks : public BLEServerCallbacks
-{
+class MyServerCallbacks : public BLEServerCallbacks {
   void onConnect(BLEServer *pServer) { deviceConnected = true; };
   void onDisconnect(BLEServer *pServer) { deviceConnected = false; }
 };
 
-// With this kind of classes we can identify if the client app is writing a characteristic and we can take actions.
-// In this case we get the Date and Time from the mobile app
-class MyCallbacksDateTime : public BLECharacteristicCallbacks
-{
-  void onWrite(BLECharacteristic *pCharacteristic)
-  {
+// With this kind of classes we can identify if the client app is writing a characteristic and we
+// can take actions. In this case we get the Date and Time from the mobile app
+class MyCallbacksDateTime : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *pCharacteristic) {
     std::string value = pCharacteristic->getValue();
 
-    if (value.length() > 0)
-    {
+    if (value.length() > 0) {
       date_time = "";
-      for (int i = 0; i < value.length(); i++)
-      {
+      for (int i = 0; i < value.length(); i++) {
         date_time = date_time + value[i];
       }
 
@@ -116,8 +117,7 @@ class MyCallbacksDateTime : public BLECharacteristicCallbacks
 };
 
 // Function for reading sensor values and taking average over set seconds
-void readSensors()
-{
+void readSensors() {
   // Average temp, humidity, and gas values over number of seconds (measureSeconds)
   float sumTemp = 0;
   float sumHum = 0;
@@ -125,9 +125,9 @@ void readSensors()
   float sumNO2 = 0;
   uint32_t count = 0;
 
-  while (count < measureSeconds)
-  {
-    sumTemp = sumTemp + dht.readTemperature(); // temp in Celsius; for temp in Fahrenheit, use dht.readTemperature(true);
+  while (count < measureSeconds) {
+    sumTemp = sumTemp + dht.readTemperature(); // temp in Celsius; for temp in Fahrenheit, use
+                                               // dht.readTemperature(true);
     sumHum = sumHum + dht.readHumidity();
 
     // Get Data from sensor CJMCU-4541
@@ -166,39 +166,35 @@ void readSensors()
   Serial.print(" # Avg Vno2: ");
   Serial.println(no2Value);
 
-  // Sprintf with float only works in ESP32, we have to take in account in case we use another processor
+  // Sprintf with float only works in ESP32, we have to take in account in case we use another
+  // processor
   sprintf(sensorValues, "%3.2f %3.2f %3.2f %3.2f", tempValue, humValue, coValue, no2Value);
 
 } // end readSensors()
 
 // Procedure to write the data into the SD Card
-// TO-DO: write the values into the SD Card identified by date_time of the first reading. It has to use rotational files
-// We have to add the sent_to_client flag when we write the row in the file to know if we sent or not the data
-void writeSDCard(fs::FS &fs, const char *path, const char *message)
-{
+// TO-DO: write the values into the SD Card identified by date_time of the first reading. It has to
+// use rotational files We have to add the sent_to_client flag when we write the row in the file to
+// know if we sent or not the data
+void writeSDCard(fs::FS &fs, const char *path, const char *message) {
   Serial.printf("Writing file: %s\n", path);
 
   File file = fs.open(path, FILE_APPEND);
-  if (!file)
-  {
+  if (!file) {
     Serial.println("Failed to open file for writing");
     return;
   }
-  if (file.println(message))
-  {
+  if (file.println(message)) {
 
     Serial.println("File written");
-  }
-  else
-  {
+  } else {
     Serial.println("Write failed");
   }
   file.close();
   Serial.println("SD card write successful");
 } // end writeSDCard()
 
-void updateStatusLED()
-{
+void updateStatusLED() {
   // Update array values with new data
   tempArray[arrayIndex] = tempValue;
   coArray[arrayIndex] = coValue;
@@ -209,10 +205,8 @@ void updateStatusLED()
   float coSum = 0;
   float no2Sum = 0;
 
-  if (afterFirst10Mins)
-  {
-    for (int i = 0; i < 10; i++)
-    {
+  if (afterFirst10Mins) {
+    for (int i = 0; i < 10; i++) {
       tempSum += tempArray[i];
       coSum += coArray[i];
       no2Sum += no2Array[i];
@@ -230,15 +224,13 @@ void updateStatusLED()
     Serial.println(no2Avg);
 
     // Check averages against thresholds
-    if ((tempAvg > tempThreshold) || (coAvg > coThreshold) || (no2Avg > no2Threshold))
-    {
+    if ((tempAvg > tempThreshold) || (coAvg > coThreshold) || (no2Avg > no2Threshold)) {
       Serial.println("Value over threshold, display red LED");
       redLED = true;
     }
   }
   // Change LED colors
-  if (redLED)
-  {
+  if (redLED) {
     statusLED.setPixelColor(0, statusLED.Color(0, 255, 0)); // Red
     statusLED.show();
   }
@@ -247,27 +239,22 @@ void updateStatusLED()
   // statusLED.setPixelColor(0, statusLED.Color(255, 255, 0)); //Yellow?
   // statusLED.show();
   //}
-  else
-  {
+  else {
     statusLED.setPixelColor(0, statusLED.Color(255, 0, 0)); // Green
     statusLED.show();
   }
 
   // Update array index
-  if (arrayIndex < 9)
-  {
+  if (arrayIndex < 9) {
     arrayIndex++;
-  }
-  else
-  {
+  } else {
     arrayIndex = 0;
     afterFirst10Mins = true;
   }
 } // end updateStatusLED()
 
 // initial setup
-void setup()
-{
+void setup() {
   Serial.println("Initial setup - begin");
   Serial.begin(115200);
 
@@ -277,11 +264,18 @@ void setup()
   pServer->setCallbacks(new MyServerCallbacks());
   BLEService *pService = pServer->createService(PROMETEO_SERVICE_UUID); // Create the BLE Service
   // Create a BLE Characteristic for the sensors readings
-  pCharacteristic = pService->createCharacteristic(SENSORS_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
-  // Create a BLE Characteristic for the date and time, it has a PROPERTY_WRITE because we expect the mobile to write this characteristic
-  pDateTime = pService->createCharacteristic(DATE_TIME_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
-  pDateTime->setCallbacks(new MyCallbacksDateTime()); // Here we indicate the callback function that we'll be called when the Mobile will write the date and time characteristic
-  pCharacteristic->addDescriptor(new BLE2902());      // Create BLE Descriptors
+  pCharacteristic = pService->createCharacteristic(SENSORS_CHARACTERISTIC_UUID,
+                                                   BLECharacteristic::PROPERTY_READ |
+                                                       BLECharacteristic::PROPERTY_NOTIFY |
+                                                       BLECharacteristic::PROPERTY_INDICATE);
+  // Create a BLE Characteristic for the date and time, it has a PROPERTY_WRITE because we expect
+  // the mobile to write this characteristic
+  pDateTime = pService->createCharacteristic(DATE_TIME_CHARACTERISTIC_UUID,
+                                             BLECharacteristic::PROPERTY_WRITE);
+  pDateTime->setCallbacks(
+      new MyCallbacksDateTime()); // Here we indicate the callback function that we'll be called
+                                  // when the Mobile will write the date and time characteristic
+  pCharacteristic->addDescriptor(new BLE2902()); // Create BLE Descriptors
   pDateTime->addDescriptor(new BLE2902());
 
   // Start the service
@@ -312,24 +306,15 @@ void setup()
   delay(5000);
 
   Serial.print("SD Card Type: ");
-  if (cardType == CARD_MMC)
-  {
+  if (cardType == CARD_MMC) {
     Serial.println("MMC");
-  }
-  else if (cardType == CARD_SD)
-  {
+  } else if (cardType == CARD_SD) {
     Serial.println("SDSC");
-  }
-  else if (cardType == CARD_SDHC)
-  {
+  } else if (cardType == CARD_SDHC) {
     Serial.println("SDHC");
-  }
-  else if (cardType == CARD_NONE)
-  {
+  } else if (cardType == CARD_NONE) {
     Serial.println("No SD card attached");
-  }
-  else
-  {
+  } else {
     Serial.println("UNKNOWN");
   }
 
@@ -363,8 +348,7 @@ void setup()
   Serial.println("Preheating gas sensor...");
   digitalWrite(PRE_PIN, 1);
   int count = 0;
-  while (count < preHeatSeconds)
-  {
+  while (count < preHeatSeconds) {
     delay(1000);
     count++;
   }
@@ -376,18 +360,17 @@ void setup()
 
 } // end setup()
 
-void loop()
-{
+void loop() {
   Serial.println("loop - begin");
 
   // We read the different sensor values
   readSensors();
 
-  // Flag to know if we sent the data to the mobile, so we can store this flag in the SD Card. In case the row in the file in the SD Card has this value false, we can send later
+  // Flag to know if we sent the data to the mobile, so we can store this flag in the SD Card. In
+  // case the row in the file in the SD Card has this value false, we can send later
   sent_to_client = false;
 
-  if (deviceConnected)
-  {
+  if (deviceConnected) {
     pCharacteristic->setValue(sensorValues);
 
     // We send a notification to the client that is connected (our Prometeo mobile app)
@@ -395,13 +378,12 @@ void loop()
 
     // We put the flag true to know that we sent this data
     sent_to_client = true;
-    writeSDCard(SD, "/sensorsReadingData.txt", date_time.c_str()); // Writing date and time in SD card before sensorReading DataLog
-    connectLED.setPixelColor(0, connectLED.Color(255, 255, 255));  // White
-    connectLED.setBrightness(10);                                  // Set BRIGHTNESS low
+    writeSDCard(SD, "/sensorsReadingData.txt",
+                date_time.c_str()); // Writing date and time in SD card before sensorReading DataLog
+    connectLED.setPixelColor(0, connectLED.Color(255, 255, 255)); // White
+    connectLED.setBrightness(10);                                 // Set BRIGHTNESS low
     connectLED.show();
-  }
-  else
-  {
+  } else {
     Serial.println("Bluetooth not connected");
     connectLED.setPixelColor(0, connectLED.Color(0, 0, 255)); // Blue
     connectLED.setBrightness(10);                             // Set BRIGHTNESS low
@@ -409,8 +391,7 @@ void loop()
   }
 
   // disconnecting
-  if (!deviceConnected && oldDeviceConnected)
-  {
+  if (!deviceConnected && oldDeviceConnected) {
     delay(500);                  // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising(); // restart advertising
     Serial.println("start advertising");
@@ -418,13 +399,13 @@ void loop()
   }
 
   // connecting
-  if (deviceConnected && !oldDeviceConnected)
-  {
+  if (deviceConnected && !oldDeviceConnected) {
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
   }
 
-  // Always write in the SD Card, if there is a Prometeo mobile app connected then we can put a flag to now that the data was sent to the mobile (so, we don't have to send again)
+  // Always write in the SD Card, if there is a Prometeo mobile app connected then we can put a flag
+  // to now that the data was sent to the mobile (so, we don't have to send again)
   if (sent_to_client)
     Serial.print("SENT TO MOBILE: ");
   else

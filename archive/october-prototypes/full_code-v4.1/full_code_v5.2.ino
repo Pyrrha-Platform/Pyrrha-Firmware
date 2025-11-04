@@ -1,11 +1,11 @@
-#include <BLEDevice.h>
-#include <BLEServer.h>
-#include <BLEUtils.h>
-#include <BLE2902.h>
+#include "Adafruit_NeoPixel.h"
 #include "DHT.h"
 #include "SD.h"
 #include "SPI.h"
-#include "Adafruit_NeoPixel.h"
+#include <BLE2902.h>
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
 #include <WiFi.h> //added to get MAC Address
 #include <esp_wifi.h>
 
@@ -20,10 +20,17 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 bool sent_to_client = false; // flag to know if we sent the data to the mobile or not
 // See the following for generating UUIDs:https://www.uuidgenerator.net/
-#define PROMETEO_SERVICE_UUID "2c32fd5f-5082-437e-8501-959d23d3d2fb"            // BLE: UUID of the Prometeo Service
-#define SENSORS_CHARACTERISTIC_UUID "dcaaccb4-c1d1-4bc4-b406-8f6f45df0208"      // BLE: UUID for sensors characteristic(all sensors readings in only one characteristic)
-#define DATE_TIME_CHARACTERISTIC_UUID "e39c34e9-d574-47fc-a66e-425cec812aab"    // BLE: UUID for the Date and Time characteristic, we are going to get this value from the mobile
-#define STATUS_CLOUD_CHARACTERISTIC_UUID "125ad2af-97cd-4f7a-b1e2-5109561f740d" // BLE: UUID for the Status Cloud Color characteristic, we are going to get this value from the mobile
+#define PROMETEO_SERVICE_UUID                                                                      \
+  "2c32fd5f-5082-437e-8501-959d23d3d2fb" // BLE: UUID of the Prometeo Service
+#define SENSORS_CHARACTERISTIC_UUID                                                                \
+  "dcaaccb4-c1d1-4bc4-b406-8f6f45df0208" // BLE: UUID for sensors characteristic(all sensors
+                                         // readings in only one characteristic)
+#define DATE_TIME_CHARACTERISTIC_UUID                                                              \
+  "e39c34e9-d574-47fc-a66e-425cec812aab" // BLE: UUID for the Date and Time characteristic, we are
+                                         // going to get this value from the mobile
+#define STATUS_CLOUD_CHARACTERISTIC_UUID                                                           \
+  "125ad2af-97cd-4f7a-b1e2-5109561f740d" // BLE: UUID for the Status Cloud Color characteristic, we
+                                         // are going to get this value from the mobile
 
 // Global Variables definition
 // Variables to put the readings from the sensors
@@ -71,31 +78,27 @@ String status_cloud;
 #define CS_PIN 33 // 4 in some setups, 33 in others
 
 // CJMCU-4541 configuration
-#define PRE_PIN 14  // Replace DigitalPin# by the number where the Pre connection of the CJMCU-4514 is connected
+#define PRE_PIN                                                                                    \
+  14 // Replace DigitalPin# by the number where the Pre connection of the CJMCU-4514 is connected
 #define VNOX_PIN 36 // Replace A3 by the AnalogPin# you are using
 #define VRED_PIN 39 // Replace A4 by the AnalogPin# you are using
 
 //  Functions Definition
 // Needed to know if a device is connected or not (deviceConnected flag)
-class MyServerCallbacks : public BLEServerCallbacks
-{
+class MyServerCallbacks : public BLEServerCallbacks {
   void onConnect(BLEServer *pServer) { deviceConnected = true; };
   void onDisconnect(BLEServer *pServer) { deviceConnected = false; }
 };
 
-// With this kind of classes we can identify if the client app is writing a characteristic and we can take actions.
-// In this case we get the Date and Time from the mobile app
-class MyCallbacksDateTime : public BLECharacteristicCallbacks
-{
-  void onWrite(BLECharacteristic *pCharacteristic)
-  {
+// With this kind of classes we can identify if the client app is writing a characteristic and we
+// can take actions. In this case we get the Date and Time from the mobile app
+class MyCallbacksDateTime : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *pCharacteristic) {
     std::string value = pCharacteristic->getValue();
-    if (value.length() > 0)
-    {
+    if (value.length() > 0) {
       date_time = "";
 
-      for (int i = 0; i < value.length(); i++)
-      {
+      for (int i = 0; i < value.length(); i++) {
         date_time = date_time + value[i];
       }
 
@@ -108,16 +111,12 @@ class MyCallbacksDateTime : public BLECharacteristicCallbacks
 };
 
 // This function is used to get the status color from the mobile
-class MyCallbacksStatusCloud : public BLECharacteristicCallbacks
-{
-  void onWrite(BLECharacteristic *pCharacteristic)
-  {
+class MyCallbacksStatusCloud : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *pCharacteristic) {
     std::string value = pCharacteristic->getValue();
-    if (value.length() > 0)
-    {
+    if (value.length() > 0) {
       status_cloud = "";
-      for (int i = 0; i < value.length(); i++)
-      {
+      for (int i = 0; i < value.length(); i++) {
         status_cloud = status_cloud + value[i];
       }
 
@@ -130,8 +129,7 @@ class MyCallbacksStatusCloud : public BLECharacteristicCallbacks
 };
 
 // Function for reading sensor values and taking average over set seconds
-void readSensors()
-{
+void readSensors() {
   // variables
   float sumTemp = 0;
   float sumHum = 0;
@@ -144,10 +142,10 @@ void readSensors()
   float no2StDevArray[measureSeconds];
 
   // Average temp, humidity, and gas values over number of seconds (measureSeconds)
-  while (count < measureSeconds)
-  {
+  while (count < measureSeconds) {
     // read temp/humidity sensor
-    float temp = dht.readTemperature(); // temp in Celsius; for temp in Fahrenheit, use dht.readTemperature(true);
+    float temp = dht.readTemperature(); // temp in Celsius; for temp in Fahrenheit, use
+                                        // dht.readTemperature(true);
     float hum = dht.readHumidity();
     sumTemp = sumTemp + temp;
     sumHum = sumHum + hum;
@@ -194,8 +192,7 @@ void readSensors()
 
   // calculate standard deviations
   // loop through arrays
-  while (stdevCount < measureSeconds)
-  {
+  while (stdevCount < measureSeconds) {
     // take array[count] - average, square it
     float sdTemp = tempStDevArray[stdevCount] - tempValue;
     sdTemp = sdTemp * sdTemp;
@@ -221,15 +218,13 @@ void readSensors()
   coValueStDev = sqrt(sumSDCO / measureSeconds);
   no2ValueStDev = sqrt(sumSDNO2 / measureSeconds);
 
-  if (coValue > coSensorMax)
-  {
+  if (coValue > coSensorMax) {
     Serial.println("CO reading exceeded sensor rating");
     coValue = -1;
     coValueStDev = 0;
   }
 
-  if (no2Value > no2SensorMax)
-  {
+  if (no2Value > no2SensorMax) {
     Serial.println("NO2 reading exceeded sensor rating");
     no2Value = -1;
     no2ValueStDev = 0;
@@ -252,32 +247,30 @@ void readSensors()
   Serial.print(" StDev NO2: ");
   Serial.println(no2ValueStDev);
 
-  // Sprintf with float only works in ESP32, we have to take in account in case we use another processor
+  // Sprintf with float only works in ESP32, we have to take in account in case we use another
+  // processor
   // TODO: not sure about this part with st dev values
-  sprintf(sensorValues, "%3.2f %3.2f %3.2f %3.2f %3.2f %3.2f %3.2f %3.2f", tempValue, tempValueStDev, humValue, humValueStDev, coValue, coValueStDev, no2Value, no2ValueStDev);
+  sprintf(sensorValues, "%3.2f %3.2f %3.2f %3.2f %3.2f %3.2f %3.2f %3.2f", tempValue,
+          tempValueStDev, humValue, humValueStDev, coValue, coValueStDev, no2Value, no2ValueStDev);
 
 } // end readSensors()
 
 // Procedure to write the data into the SD Card
-// TO-DO: write the values into the SD Card identified by date_time of the first reading. It has to use rotational files
-// We have to add the sent_to_client flag when we write the row in the file to know if we sent or not the data
-void writeSDCard(fs::FS &fs, const char *path, const char *message)
-{
+// TO-DO: write the values into the SD Card identified by date_time of the first reading. It has to
+// use rotational files We have to add the sent_to_client flag when we write the row in the file to
+// know if we sent or not the data
+void writeSDCard(fs::FS &fs, const char *path, const char *message) {
   Serial.printf("Writing file: %s\n", path);
   File file = fs.open(path, FILE_APPEND);
 
-  if (!file)
-  {
+  if (!file) {
     Serial.println("Failed to open file for writing");
     return;
   }
 
-  if (file.println(message))
-  {
+  if (file.println(message)) {
     Serial.println("File written");
-  }
-  else
-  {
+  } else {
     Serial.println("Write failed");
   }
 
@@ -286,8 +279,7 @@ void writeSDCard(fs::FS &fs, const char *path, const char *message)
 
 } // end writeSDCard()
 
-void updateStatusLED()
-{
+void updateStatusLED() {
   // Update array values with new data
   tempArray[arrayIndex] = tempValue;
   coArray[arrayIndex] = coValue;
@@ -298,10 +290,8 @@ void updateStatusLED()
   float coSum = 0;
   float no2Sum = 0;
 
-  if (afterFirst10Mins)
-  {
-    for (int i = 0; i < 10; i++)
-    {
+  if (afterFirst10Mins) {
+    for (int i = 0; i < 10; i++) {
       tempSum += tempArray[i];
       coSum += coArray[i];
       no2Sum += no2Array[i];
@@ -319,13 +309,10 @@ void updateStatusLED()
     Serial.println(no2Avg);
 
     // Check averages against thresholds
-    if ((tempAvg > tempThreshold) || (coAvg > coThreshold) || (no2Avg > no2Threshold))
-    {
+    if ((tempAvg > tempThreshold) || (coAvg > coThreshold) || (no2Avg > no2Threshold)) {
       Serial.println("Value over threshold, display red LED");
       colourLED = 3; // 1 - blue, 2 - yellow, 3 - red
-    }
-    else
-    {
+    } else {
       colourLED = 1; // blue
     }
   } // end if(afterFirst10Mins)
@@ -336,43 +323,38 @@ void updateStatusLED()
   }
 
   // Change LED colors
-  switch (colourLED)
-  {
-  case 3: // red
-    // statusLED.setPixelColor(0, statusLED.Color(0, 255, 0)); // Red
-    colorWipeStatusLED(statusLED.Color(0, 255, 0), 5); // Red
-    statusLED.show();
-    Serial.println("LED colour is red");
-    break;
-  case 2: // yellow
-    // statusLED.setPixelColor(0, statusLED.Color(255, 255, 0)); //Yellow?
-    colorWipeStatusLED(statusLED.Color(255, 255, 0), 5); // Yellow?
-    statusLED.show();
-    Serial.println("LED colour is yellow");
-    break;
-  case 1: // blue
-    // statusLED.setPixelColor(0, statusLED.Color(0, 0, 255)); // Blue
-    colorWipeStatusLED(statusLED.Color(0, 0, 255), 5); // Blue
-    statusLED.show();
-    Serial.println("LED colour is blue");
-    break;
+  switch (colourLED) {
+    case 3: // red
+      // statusLED.setPixelColor(0, statusLED.Color(0, 255, 0)); // Red
+      colorWipeStatusLED(statusLED.Color(0, 255, 0), 5); // Red
+      statusLED.show();
+      Serial.println("LED colour is red");
+      break;
+    case 2: // yellow
+      // statusLED.setPixelColor(0, statusLED.Color(255, 255, 0)); //Yellow?
+      colorWipeStatusLED(statusLED.Color(255, 255, 0), 5); // Yellow?
+      statusLED.show();
+      Serial.println("LED colour is yellow");
+      break;
+    case 1: // blue
+      // statusLED.setPixelColor(0, statusLED.Color(0, 0, 255)); // Blue
+      colorWipeStatusLED(statusLED.Color(0, 0, 255), 5); // Blue
+      statusLED.show();
+      Serial.println("LED colour is blue");
+      break;
   }
 
   // Update array index
-  if (arrayIndex < 9)
-  {
+  if (arrayIndex < 9) {
     arrayIndex++;
-  }
-  else
-  {
+  } else {
     arrayIndex = 0;
     afterFirst10Mins = true;
   }
 } // end updateStatusLED()
 
 // initial setup
-void setup()
-{
+void setup() {
   Serial.println("Initial setup - begin");
   Serial.begin(115200);
 
@@ -386,15 +368,26 @@ void setup()
   pServer->setCallbacks(new MyServerCallbacks());
   BLEService *pService = pServer->createService(PROMETEO_SERVICE_UUID); // Create the BLE Service
   // Create a BLE Characteristic for the sensors readings
-  pCharacteristic = pService->createCharacteristic(SENSORS_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_INDICATE);
-  // Create a BLE Characteristic for the date and time, it has a PROPERTY_WRITE because we expect the mobile to write this characteristic
-  pDateTime = pService->createCharacteristic(DATE_TIME_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
-  pDateTime->setCallbacks(new MyCallbacksDateTime()); // Here we indicate the callback function that we'll be called when the Mobile will write the date and time characteristic
+  pCharacteristic = pService->createCharacteristic(SENSORS_CHARACTERISTIC_UUID,
+                                                   BLECharacteristic::PROPERTY_READ |
+                                                       BLECharacteristic::PROPERTY_NOTIFY |
+                                                       BLECharacteristic::PROPERTY_INDICATE);
+  // Create a BLE Characteristic for the date and time, it has a PROPERTY_WRITE because we expect
+  // the mobile to write this characteristic
+  pDateTime = pService->createCharacteristic(DATE_TIME_CHARACTERISTIC_UUID,
+                                             BLECharacteristic::PROPERTY_WRITE);
+  pDateTime->setCallbacks(
+      new MyCallbacksDateTime()); // Here we indicate the callback function that we'll be called
+                                  // when the Mobile will write the date and time characteristic
 
-  // Create a BLE Characteristic for the status color from the cloud, it has a PROPERTY_WRITE because we expect the mobile to write this characteristic
-  pStatusCloud = pService->createCharacteristic(STATUS_CLOUD_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
-  pStatusCloud->setCallbacks(new MyCallbacksStatusCloud()); // Here we indicate the callback function that we'll be called when the Mobile will write the date and time characteristic
-  pCharacteristic->addDescriptor(new BLE2902());            // Create BLE Descriptors
+  // Create a BLE Characteristic for the status color from the cloud, it has a PROPERTY_WRITE
+  // because we expect the mobile to write this characteristic
+  pStatusCloud = pService->createCharacteristic(STATUS_CLOUD_CHARACTERISTIC_UUID,
+                                                BLECharacteristic::PROPERTY_WRITE);
+  pStatusCloud->setCallbacks(
+      new MyCallbacksStatusCloud()); // Here we indicate the callback function that we'll be called
+                                     // when the Mobile will write the date and time characteristic
+  pCharacteristic->addDescriptor(new BLE2902()); // Create BLE Descriptors
   pDateTime->addDescriptor(new BLE2902());
   pStatusCloud->addDescriptor(new BLE2902());
 
@@ -465,8 +458,7 @@ void setup()
   Serial.println("Preheating gas sensor...");
   digitalWrite(PRE_PIN, 1);
   int count = 0;
-  while (count < preHeatSeconds)
-  {
+  while (count < preHeatSeconds) {
     delay(1000);
     count++;
   }
@@ -478,29 +470,27 @@ void setup()
 
 } // end setup()
 
-void loop()
-{
+void loop() {
   Serial.println("loop - begin");
   // We read the different sensor values
   readSensors();
 
-  // Flag to know if we sent the data to the mobile, so we can store this flag in the SD Card. In case the row in the file in the SD Card has this value false, we can send later
+  // Flag to know if we sent the data to the mobile, so we can store this flag in the SD Card. In
+  // case the row in the file in the SD Card has this value false, we can send later
   sent_to_client = false;
 
-  if (deviceConnected)
-  {
+  if (deviceConnected) {
     pCharacteristic->setValue(sensorValues);
     // We send a notification to the client that is connected (our Prometeo mobile app)
     pCharacteristic->notify();
     // We put the flag true to know that we sent this data
     sent_to_client = true;
-    writeSDCard(SD, "/sensorsReadingData0.txt", date_time.c_str()); // Writing date and time in SD card before sensorReading DataLog
+    writeSDCard(SD, "/sensorsReadingData0.txt",
+                date_time.c_str()); // Writing date and time in SD card before sensorReading DataLog
     Serial.print("Writing datetime to SD card:");
     Serial.println(date_time.c_str());
     colorWipeConnectLED(connectLED.Color(0, 0, 255), 5); // Blue
-  }
-  else
-  {
+  } else {
     Serial.println("Bluetooth not connected");
     // connectLED.setPixelColor(0, connectLED.Color(0, 0, 255)); // Blue
     colorWipeConnectLED(connectLED.Color(0, 0, 0), 5); // Off?
@@ -508,8 +498,7 @@ void loop()
   }
 
   // disconnecting
-  if (!deviceConnected && oldDeviceConnected)
-  {
+  if (!deviceConnected && oldDeviceConnected) {
     delay(500);                  // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising(); // restart advertising
     Serial.println("start advertising");
@@ -517,13 +506,13 @@ void loop()
   }
 
   // connecting
-  if (deviceConnected && !oldDeviceConnected)
-  {
+  if (deviceConnected && !oldDeviceConnected) {
     // do stuff here on connecting
     oldDeviceConnected = deviceConnected;
   }
 
-  // Always write in the SD Card, if there is a Prometeo mobile app connected then we can put a flag to now that the data was sent to the mobile (so, we don't have to send again)
+  // Always write in the SD Card, if there is a Prometeo mobile app connected then we can put a flag
+  // to now that the data was sent to the mobile (so, we don't have to send again)
   if (sent_to_client)
     Serial.print("SENT TO MOBILE: ");
   else
@@ -545,22 +534,18 @@ void loop()
 
 } // end loop
 
-void colorWipeStatusLED(uint32_t color, int wait)
-{
-  for (int i = 0; i < statusLED.numPixels(); i++)
-  {                                    // For each pixel in strip...
-    statusLED.setPixelColor(i, color); //  Set pixel's color (in RAM)
-    statusLED.show();                  //  Update strip to match
-    delay(wait);                       //  Pause for a moment
+void colorWipeStatusLED(uint32_t color, int wait) {
+  for (int i = 0; i < statusLED.numPixels(); i++) { // For each pixel in strip...
+    statusLED.setPixelColor(i, color);              //  Set pixel's color (in RAM)
+    statusLED.show();                               //  Update strip to match
+    delay(wait);                                    //  Pause for a moment
   }
 }
 
-void colorWipeConnectLED(uint32_t color, int wait)
-{
-  for (int i = 0; i < connectLED.numPixels(); i++)
-  {                                     // For each pixel in strip...
-    connectLED.setPixelColor(i, color); //  Set pixel's color (in RAM)
-    connectLED.show();                  //  Update strip to match
-    delay(wait);                        //  Pause for a moment
+void colorWipeConnectLED(uint32_t color, int wait) {
+  for (int i = 0; i < connectLED.numPixels(); i++) { // For each pixel in strip...
+    connectLED.setPixelColor(i, color);              //  Set pixel's color (in RAM)
+    connectLED.show();                               //  Update strip to match
+    delay(wait);                                     //  Pause for a moment
   }
 }
